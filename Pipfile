@@ -5,8 +5,9 @@ name = "pypi"
 
 [packages]
 llama-cpp-python = "*"
-kserve = "*"
 black = "*"
+mlserver = "*"
+pydantic = "*"
 
 [dev-packages]
 

@@ -1,0 +1,7 @@
+{
+    "name": "custom_serving_llm",
+    "implementation": "MLServerLLM.LLama2Model",
+    "parameters": {
+        "uri": "../llama.cpp/models/ggml-model-q4_0.gguf"
+    }
+}

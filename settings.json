@@ -1,0 +1,11 @@
+{
+    "debug": true,
+    "http_port": 8087,
+    "grpc_port": 8088,
+    "metrics_port": 8089,
+    "cors_settings": {
+      "allow_origins": [
+        "*"
+      ]
+    }
+  }
