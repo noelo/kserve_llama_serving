@@ -5,7 +5,10 @@ from mlserver.types import InferenceRequest
 from mlserver.codecs import NumpyCodec
 from mlserver.codecs.numpy import NumpyRequestCodec
 
-explain_parameters={"model": "gpt-3.5-turbo","messages": "explain quantum theory in basic terms"}
+explain_parameters = {
+    "model": "gpt-3.5-turbo",
+    "messages": "explain quantum theory in basic terms",
+}
 x = np.array(explain_parameters)
 
 inference_request = NumpyRequestCodec.encode_request(x)

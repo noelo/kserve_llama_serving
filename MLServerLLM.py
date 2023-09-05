@@ -8,6 +8,7 @@ from mlserver.utils import get_model_uri
 from mlserver.codecs.numpy import NumpyRequestCodec
 import numpy
 import json
+
 # foo = '{ "name":"John", "age":30, "city":"This is a test of how this all works?"}'
 # # foo = ["bar", "bar2"]
 # explain_parameters={"threshold": 0.95,"p_sample": 0.5,"tau": 0.25,"message":"this is a test message"}
@@ -25,9 +26,14 @@ import json
 # print(k["threshold"])
 # inference_response = NumpyRequestCodec.encode_response(model_name="testmodel", payload=x)
 # print(inference_response)
-
-
-
+# from mlserver.codecs.numpy import NumpyRequestCodec
+# import numpy
+# thisdict = {
+#   "brand": "Ford",
+#   "model": "Mustang",
+#   "year": 1964
+# }
+# print(NumpyRequestCodec.encode_response(model_name="testmodel", payload=numpy.array(thisdict)))
 
 
 logger = logging.getLogger()
@@ -37,9 +43,9 @@ sh = logging.StreamHandler()
 sh.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
 logger.addHandler(sh)
 
-STORAGE_URI:str = os.getenv("STORAGE_URI")
-MODEL_MNT:str = os.getenv("MODEL_MNT")
-CTX_SIZE:int = os.getenv("CTX_SIZE")
+STORAGE_URI: str = os.getenv("STORAGE_URI")
+MODEL_MNT: str = os.getenv("MODEL_MNT")
+CTX_SIZE: int = os.getenv("CTX_SIZE")
 
 if CTX_SIZE is None:
     CTX_SIZE = 512
@@ -62,12 +68,16 @@ class LLama2Model(MLModel):
 
     async def predict(self, payload: types.InferenceRequest) -> types.InferenceResponse:
         payload = self._check_request(payload)
+        output = self._predict_outputs(payload)
 
-        return types.InferenceResponse(
-            model_name=self.name,
-            model_version=self.version,
-            outputs=self._predict_outputs(payload),
-        )
+        logging.debug(f"Output {output}")
+        return output
+
+        # return types.InferenceResponse(
+        #     model_name=self.name,
+        #     model_version=self.version,
+        #     outputs=fred,
+        # )
 
     def _load_model_from_file(self, file_uri):
         logging.info(f"Loading model {file_uri}")
@@ -81,7 +91,9 @@ class LLama2Model(MLModel):
             raise InferenceError("Invalid request payload ") from exc
         return payload
 
-    def _predict_outputs(self, payload: types.InferenceRequest) -> List[types.ResponseOutput]:
+    def _predict_outputs(
+        self, payload: types.InferenceRequest
+    ) -> List[types.ResponseOutput]:
         logging.info(f"predict request ==> {payload}")
 
         json_request = (json.loads(payload.inputs[0].data.json()))[0]
@@ -101,6 +113,11 @@ class LLama2Model(MLModel):
             top_p=top_p,
             repeat_penalty=rep_penalty,
         )
-        model_inference_response = NumpyRequestCodec.encode_response(model_name="testmodel", payload=model_reponse)
+        model_inference_response = []
+        model_inference_response.append(
+            NumpyRequestCodec.encode_response(
+                model_name=self.name, payload=numpy.array(model_reponse)
+            )
+        )
         logging.info(model_inference_response)
         return model_inference_response
