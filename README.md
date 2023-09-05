@@ -1,4 +1,4 @@
-# Kserve custom serving runtime using llama.cpp
+# Kserve custom serving runtime using llama.cpp & mlserver
 
 * Get access to the llama2 models from Meta (https://ai.meta.com/llama/)
 * Use llama.cpp (https://github.com/ggerganov/llama.cpp) to convert and quantize the models
@@ -13,5 +13,32 @@
 ## To run in podman
 
 ```
-podman run --rm -p 9090:8080 -v ./dev/llama.cpp/models/:/mnt/models/:ro,z -e STORAGE_URI=pvc://ggml-model-q4_0.gguf -e MODEL_MNT=/mnt/models/ quay.io/noeloc/llama_serving
+podman run -it --rm -p 8087:8087 -v ../llama.cpp/models/:/mnt/models/:ro,z -e MLSERVER_MODEL_URI=/mnt/models/ggml-model-q4_0.gguf quay.io/noeloc/llamacppserving
+
+```
+
+## Example Inference request
+
+```python
+import requests
+import numpy as np
+
+from mlserver.types import InferenceRequest
+from mlserver.codecs import NumpyCodec
+from mlserver.codecs.numpy import NumpyRequestCodec
+
+explain_parameters = {
+    "model": "llama.cpp.llama2",
+    "messages": "explain quantum theory in basic terms",
+    "max_tokens" : 190,
+}
+x = np.array(explain_parameters)
+
+inference_request = NumpyRequestCodec.encode_request(x)
+
+endpoint = "http://your_hostname_port_here/v2/models/llama.cpp.llama2/infer"
+response = requests.post(endpoint, json=inference_request.dict())
+
+print(response.text)
+
 ```
