@@ -1,57 +1,24 @@
 import os
-from llama_cpp import Llama
-from typing import List
-import logging
-from mlserver import MLModel, types
-from mlserver.errors import InferenceError
-from mlserver.utils import get_model_uri
-from mlserver.codecs.numpy import NumpyRequestCodec
 import numpy
 import json
+import logging
+from llama_cpp import Llama
+from typing import List
+from mlserver import MLModel, types
+from mlserver.codecs import NumpyCodec
+from mlserver.errors import InferenceError
+from mlserver.utils import get_model_uri
 
-# foo = '{ "name":"John", "age":30, "city":"This is a test of how this all works?"}'
-# # foo = ["bar", "bar2"]
-# explain_parameters={"threshold": 0.95,"p_sample": 0.5,"tau": 0.25,"message":"this is a test message"}
-# x = numpy.array(explain_parameters)
-# from mlserver.codecs.string import StringRequestCodec
-# from mlserver.codecs.numpy import NumpyRequestCodec
-# inference_request = NumpyRequestCodec.encode_request(x)
-# # print(inference_request)
-# raw_request = inference_request.dict()
-# # print(raw_request)
-# z = inference_request.inputs[0].data.json()
-# # print(z.dict())
-# k = (json.loads(z))[0]
-# # l = k[0]
-# print(k["threshold"])
-# inference_response = NumpyRequestCodec.encode_response(model_name="testmodel", payload=x)
-# print(inference_response)
-# from mlserver.codecs.numpy import NumpyRequestCodec
-# import numpy
-# thisdict = {
-#   "brand": "Ford",
-#   "model": "Mustang",
-#   "year": 1964
-# }
-# print(NumpyRequestCodec.encode_response(model_name="testmodel", payload=numpy.array(thisdict)))
-
-
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-
+logger = logging.getLogger("LLama2Model")
+logger.setLevel(logging.DEBUG)
 sh = logging.StreamHandler()
 sh.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
 logger.addHandler(sh)
 
-STORAGE_URI: str = os.getenv("STORAGE_URI")
-MODEL_MNT: str = os.getenv("MODEL_MNT")
 CTX_SIZE: int = os.getenv("CTX_SIZE")
 
 if CTX_SIZE is None:
     CTX_SIZE = 512
-
-if STORAGE_URI is None:
-    STORAGE_URI = ""
 
 
 class LLama2Model(MLModel):
@@ -70,14 +37,11 @@ class LLama2Model(MLModel):
         payload = self._check_request(payload)
         output = self._predict_outputs(payload)
 
-        logging.debug(f"Output {output}")
-        return output
-
-        # return types.InferenceResponse(
-        #     model_name=self.name,
-        #     model_version=self.version,
-        #     outputs=fred,
-        # )
+        return types.InferenceResponse(
+            model_name=self.name,
+            model_version=self.version,
+            outputs=output,
+        )
 
     def _load_model_from_file(self, file_uri):
         logging.info(f"Loading model {file_uri}")
@@ -113,11 +77,11 @@ class LLama2Model(MLModel):
             top_p=top_p,
             repeat_penalty=rep_penalty,
         )
+
         model_inference_response = []
         model_inference_response.append(
-            NumpyRequestCodec.encode_response(
-                model_name=self.name, payload=numpy.array(model_reponse)
-            )
+            NumpyCodec.encode_output(self.name, numpy.array(model_reponse))
         )
+
         logging.info(model_inference_response)
         return model_inference_response

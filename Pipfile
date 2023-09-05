@@ -8,6 +8,7 @@ llama-cpp-python = "*"
 black = "*"
 mlserver = "*"
 pydantic = "*"
+ptvsd = "*"
 
 [dev-packages]
 
