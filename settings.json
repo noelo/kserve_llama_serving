@@ -1,6 +1,8 @@
 {
     "debug": true,
     "logging_settings" : "logging.conf",
+    "metrics_dir" : "/tmp/mlserver",
+    "environments_dir" : "/tmp/mlserver",
     "http_port": 8087,
     "grpc_port": 8088,
     "metrics_port": 8089,

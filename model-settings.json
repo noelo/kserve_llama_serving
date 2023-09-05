@@ -1,7 +1,4 @@
 {
     "name": "llama.cpp.llama2",
-    "implementation": "MLServerLLM.LLama2Model",
-    "parameters": {
-        "uri": "../llama.cpp/models/ggml-model-q4_0.gguf"
-    }
+    "implementation": "MLServerLLM.LLama2Model"
 }

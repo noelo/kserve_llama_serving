@@ -2,6 +2,7 @@ import os
 import numpy
 import json
 import logging
+import mlserver
 from llama_cpp import Llama
 from typing import List
 from mlserver import MLModel, types
@@ -28,6 +29,8 @@ class LLama2Model(MLModel):
 
         # parse/process file and instantiate the model
         self._model = self._load_model_from_file(model_uri)
+
+        mlserver.register("max_tokens_metric", "Max Tokens per request")
 
         # set ready to signal that model is loaded
         self.ready = True
@@ -68,6 +71,8 @@ class LLama2Model(MLModel):
         rep_penalty = json_request.get("repetition penalty", 1.1)
         top_k = json_request.get("top_k", 40)
         top_p = json_request.get("top_p", 0.95)
+
+        mlserver.log(max_tokens_metric=max_tokens)
 
         model_reponse = self._model(
             prompt=prompt,

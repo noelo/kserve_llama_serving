@@ -12,14 +12,17 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY llm_serving.py .
-# Expose the port the app runs on
+COPY MLServerLLM.py .
+COPY logging.conf .
+COPY settings.json .
+COPY model-settings.json .
+COPY test_request.py .
 
-
-ENV STORAGE_URI=pvc://none
-ENV MODEL_MNT=/mnt/models
 ENV CTX_SIZE=512
+ENV MLSERVER_MODEL_URI=/tmp/models
 
-EXPOSE 8080
+EXPOSE 8087
+EXPOSE 8088
+EXPOSE 8089
 # Command to run the application
-CMD ["python3", "llm_serving.py"]
+CMD ["mlserver", "start", "."]
