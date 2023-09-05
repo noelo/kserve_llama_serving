@@ -1,4 +1,9 @@
 {
     "name": "llama.cpp.llama2",
-    "implementation": "MLServerLLM.LLama2Model"
+    "implementation": "MLServerLLM.LLama2Model",
+    "parameters": {
+            "extra":{
+                "ctx_size":512
+            }
+    }
 }

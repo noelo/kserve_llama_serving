@@ -16,10 +16,9 @@ sh = logging.StreamHandler()
 sh.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
 logger.addHandler(sh)
 
-CTX_SIZE: int = os.getenv("CTX_SIZE")
 
-if CTX_SIZE is None:
-    CTX_SIZE = 512
+CONTEXT_SIZE_KEY = "ctx_size"
+
 
 
 class LLama2Model(MLModel):
@@ -47,8 +46,15 @@ class LLama2Model(MLModel):
         )
 
     def _load_model_from_file(self, file_uri):
-        logging.info(f"Loading model {file_uri}")
-        return Llama(model_path=file_uri, n_ctx=CTX_SIZE)
+        cxt_size = 512
+        if self.settings.parameters:
+            if self.settings.parameters.extra:
+                if CONTEXT_SIZE_KEY in self.settings.parameters.extra:
+                    ctx_size = self.settings.parameters.extra[CONTEXT_SIZE_KEY]
+                    
+
+        logging.info(f"Loading model {file_uri} with context size of {ctx_size}")
+        return Llama(model_path=file_uri, n_ctx=ctx_size)
 
     def _check_request(self, payload: types.InferenceRequest) -> types.InferenceRequest:
         try:

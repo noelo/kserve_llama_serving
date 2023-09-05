@@ -18,8 +18,7 @@ COPY settings.json .
 COPY model-settings.json .
 COPY test_request.py .
 
-ENV CTX_SIZE=512
-ENV MLSERVER_MODEL_URI=/tmp/models
+ENV MLSERVER_MODEL_URI=/mnt/models
 
 EXPOSE 8087
 EXPOSE 8088
